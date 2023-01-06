@@ -1,0 +1,21 @@
+{
+    "title": "Money Schema",
+    "type": "array",
+    "additionalItems": false,
+    "items": {
+        "type": "object",
+        "required": [
+            "name",
+            "balance"
+        ],
+        "additionalProperties": false,
+        "properties": {
+            "name": {
+                "type": "string"
+            },
+            "balance": {
+                "type": "number"
+            }
+        }
+    }
+}

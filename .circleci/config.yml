@@ -1,0 +1,59 @@
+version: 2.1
+jobs:
+  test_job:
+      docker:
+      - image: cimg/base:stable
+      steps:
+      - checkout
+      - run:
+          name: Test step for test job
+          command: echo "Test step"
+  trigger-e2e-tests:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.28.0-focal
+    steps:
+      - checkout
+      - run:
+          name: Kick off new pipeline
+          command: |  
+            apt-get update 
+            apt-get install -y jq
+            PIPELINE_ID=$(curl --location --request POST 'https://circleci.com/api/v2/project/github/coingaming/hi_casino_e2e_tests/pipeline' \
+            --header 'Content-Type: application/json' \
+            -u "${E2E_TESTS_API_TOKEN}:" \
+            | jq -r '.id')
+
+            echo "export PIPELINE=${PIPELINE_ID}" >> $BASH_ENV
+      - run:
+          name: Get status new pipeline
+          command: |
+            sleep 3
+            STATUS=$(curl -s "https://circleci.com/api/v2/pipeline/${PIPELINE}/workflow?circle-token=${E2E_TESTS_API_TOKEN}" | jq -r '.items[].status')
+
+            while [ "${STATUS}" == "running" ]; do
+              echo still running
+              sleep 10
+              STATUS=$(curl -s "https://circleci.com/api/v2/pipeline/${PIPELINE}/workflow?circle-token=${E2E_TESTS_API_TOKEN}" | jq -r '.items[].status')
+            done
+
+            echo "finally done, checking final status: ${STATUS}"
+            if [[ "${STATUS}" == "success" ]]; then
+              echo "Proceeding with build, as triggered pipeline was success"
+              exit 0
+            else
+              echo "Stopping build, triggered pipeline was not a success"
+              exit 1
+            fi
+
+workflows:
+  trigger-e2e-tests-workflow:
+    jobs:
+      - test_job
+      - hold_until_deploy_completed:
+          name: "Wait until Deploy Prelive fully completed"
+          type: approval
+          requires:
+            - test_job
+      - trigger-e2e-tests:
+          requires:
+                - "Wait until Deploy Prelive fully completed"

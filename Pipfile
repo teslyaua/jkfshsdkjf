@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+flask-restful = "*"
+pytest = "*"
+requests = "*"
+jsonschema = "==4.2.1"
+allure-pytest = "*"
+faker = "*"
+curlify2 = "*"
+requests-toolbelt = "*"
+pytest-dotenv = "*"
+locust = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

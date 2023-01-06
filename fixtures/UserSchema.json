@@ -1,0 +1,19 @@
+{
+    "title": "User Schema",
+    "type": "object",
+    "required": [
+        "balance",
+        "name"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "balance": {
+            "title": "The balance Schema",
+            "type": "number"
+        },
+        "name": {
+            "title": "The name Schema",
+            "type": "string"
+        }
+    }
+}
